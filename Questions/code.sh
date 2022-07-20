@@ -2,8 +2,8 @@
 
 ques=$(basename "$(pwd)")
 
-if [ "$(basename "$(pwd)")" = "Questions" ]; then
-	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question)
+if [ "$ques" = "Questions" ]; then
+	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i)
 	#ques=$(cat ../questions_dump.json | json_pp -f json | grep -P '"(title|frontendQuestionId)" :' | sed -n 'N;s/\n/ /g;p' | cut --output-delimiter='. ' -d'"' -f4,8 | rofi -dmenu -no-custom -p "Question")
 
 	if [ "$ques" = "" ]; then
@@ -28,13 +28,10 @@ if [ "$(basename "$(pwd)")" = "Questions" ]; then
 	#fi
 fi
 
-lang=$(cat details.json | json_pp -f json | grep '"lang" :' | cut -d'"' -f4 | rofi -dmenu -no-custom -p Language)
-# | awk -F'"' '
-#$0 ~ /codeSnippets/ {f = 1}
-#$0 ~ /"lang" :/ {
-#	if (f == 1) print $4
-#}
-#$0 ~ /^ +], *$/ {exit}' | rofi -dmenu -no-custom)
+lang=$(cat details.json | json_pp -f json | grep '"lang" :' | cut -d'"' -f4 | rofi -dmenu -no-custom -mesg "
+    Question: $ques
+" -p Language -i)
+
 if [ "$lang" = "" ]; then
 	exit 1
 fi

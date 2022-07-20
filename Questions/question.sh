@@ -3,7 +3,7 @@
 ques=$(basename "$(pwd)")
 
 if [ "$(basename "$(pwd)")" = "Questions" ]; then
-	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question)
+	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i)
 
 	if [ "$ques" = "" ]; then
 		exit 1
