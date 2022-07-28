@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# get the name of the user preferred browser
+browser="google-chrome-stable"
+
+# check if the browser exists, if it doesn't exist then use the default browser
+browser=$(which "$browser" 2> /dev/null || echo "xdg-open")
+
 ques=$(basename "$(pwd)")
 
 if [ "$ques" = "Questions" ]; then
@@ -235,4 +241,4 @@ cat <<EOF >> $file
 </html>
 EOF
 
-xdg-open $file
+$browser $file

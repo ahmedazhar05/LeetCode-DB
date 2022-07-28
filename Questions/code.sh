@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# get the name of the user preferred code-editor or IDE
+editor="vim"
+
+# check if the editor exists, if it doesn't exist then use the default editor
+editor=$(which "$editor" 2> /dev/null || echo "xdg-open")
+
 ques=$(basename "$(pwd)")
 
 if [ "$ques" = "Questions" ]; then
@@ -44,11 +50,11 @@ if [ $? -eq 0 ]; then
 
 	case "$action" in
 		"1. Open the existing code")
-			vim "code.$ext"
+			$editor "code.$ext"
 		;;
 		"2. Overwrite existing code, fresh start")
-			vim "code.$ext"	
 			echo "$details" | grep -P "\"lang\" ?: \"$lang\"" -B 1 -A 2 | grep '"code"' | cut -d'"' -f4 | sed 's/\\n/\n/g' > "code.$ext"
+			$editor "code.$ext"	
 		;;
 		"3. Delete existing $lang code")
 			rm "code.$ext"
@@ -60,8 +66,8 @@ if [ $? -eq 0 ]; then
 		;;
 	esac
 else
-	vim "code.$ext"	
 	echo "$details" | grep -P "\"lang\" ?: \"$lang\"" -B 1 -A 2 | grep '"code"' | cut -d'"' -f4 | sed 's/\\n/\n/g' > "code.$ext"
+	$editor "code.$ext"	
 fi
 
 [[ $(ls 1 2> /dev/null) ]] && rm 1 > /dev/null
