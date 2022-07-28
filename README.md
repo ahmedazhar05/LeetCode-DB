@@ -14,7 +14,6 @@ Motivation to collate this list is to attain consistency in solving LeetCode pro
 
 ## Requirements
 - [rofi](https://github.com/davatorium/rofi/blob/next/INSTALL.md)
-- [json\_pp](https://perldoc.perl.org/json_pp)
 
 ## Usage
 There are two different scripts that are provided for two different use cases:

@@ -2,7 +2,7 @@
 
 ques=$(basename "$(pwd)")
 
-if [ "$(basename "$(pwd)")" = "Questions" ]; then
+if [ "$ques" = "Questions" ]; then
 	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i)
 
 	if [ "$ques" = "" ]; then
@@ -13,16 +13,27 @@ fi
 
 file=$(ls /tmp/question* 2>/dev/null || mktemp --tmpdir --suffix=.html questionXXX)
 
-json=$(cat details.json | json_pp -f json -json_opt pretty,indent_length=0)
-stats=$(echo -n "$json" | sed -n '/"stats" : /{s/^"stats" : "//g; s/",$//g; s/\\"/"/g; p}' | json_pp -f json -json_opt pretty,indent_length=0)
+parser=
+if [[ $(which json_reformat 2> /dev/null) ]]; then
+	parser="json_reformat"
+elif [[ $(which json_pp 2> /dev/null) ]]; then
+	parser="json_pp -f json"
+elif [[ $(which python 2> /dev/null) ]]; then
+	parser="python -m json.tool"
+else
+	parser="python3 -m json.tool"
+fi
 
-likes=$(echo "$json" | grep -Po '"likes" :.*' | grep -Po '\d+')
-dislikes=$(echo "$json" | grep -Po '"dislikes" :.*' | grep -Po '\d+')
-difficulty=$(echo "$json" | grep '"difficulty" : ' | cut -d'"' -f4)
+json="$(cat details.json | $parser)"
+stats="$(echo -n "$json" | sed -n '/"stats" \?: /{s/^\s*"stats" \?: "//g; s/",$//g; s/\\"/"/g; p}' | $parser)"
 
-accrate=$(echo "$stats" | grep '"acRate" : ' | cut -d'"' -f4)
-acceptance=$(echo "$stats" | grep '"totalAcceptedRaw" : ' | grep -Po '\d+')
-submissions=$(echo "$stats" | grep '"totalSubmissionRaw" : ' | grep -Po '\d+')
+likes=$(echo "$json" | grep -Po '"likes" ?:.*' | grep -Po '\d+')
+dislikes=$(echo "$json" | grep -Po '"dislikes" ?:.*' | grep -Po '\d+')
+difficulty=$(echo "$json" | grep -P '"difficulty" ?: ' | cut -d'"' -f4)
+
+accrate=$(echo "$stats" | grep -P '"acRate" ?: ' | cut -d'"' -f4)
+acceptance=$(echo "$stats" | grep -P '"totalAcceptedRaw" ?: ' | grep -Po '\d+')
+submissions=$(echo "$stats" | grep -P '"totalSubmissionRaw" ?: ' | grep -Po '\d+')
 
 cat <<EOF > $file
 <!DOCTYPE html>
@@ -195,7 +206,7 @@ cat <<EOF > $file
         <div id="content" class="content__u3I1">
 EOF
 
-content=$(cat details.json | json_pp -f json -json_opt pretty,indent_length=0 | sed -n '/"content" :/{s/^\s*"content" : "//g; s/",$//g; s/\\"/"/g; s/\\n/\n/g; s/\\t/\t/g; p;}')
+content=$(cat details.json | $parser | sed -n '/"content" \?:/{s/^\s*"content" \?: "//g; s/",$//g; s/\\"/"/g; s/\\n/\n/g; s/\\t/\t/g; p;}')
 if [ ${#content} -lt 20 ]; then
     echo '<div class="premium">Premium Subscription is required</div>' >> $file
 else

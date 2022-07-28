@@ -4,31 +4,25 @@ ques=$(basename "$(pwd)")
 
 if [ "$ques" = "Questions" ]; then
 	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i)
-	#ques=$(cat ../questions_dump.json | json_pp -f json | grep -P '"(title|frontendQuestionId)" :' | sed -n 'N;s/\n/ /g;p' | cut --output-delimiter='. ' -d'"' -f4,8 | rofi -dmenu -no-custom -p "Question")
 
 	if [ "$ques" = "" ]; then
 		exit 1
 	fi
 	cd "$ques"
-
-	#echo "Enter Question Number: "
-	#read n
-	#q=$(ls | grep -P "^$n\. .+")
-	#if [ ${#q} -gt 3 ]; then
-	#	printf "Question: %s? [Y/n]: " "$q"
-	#	read ack
-	#	if [ "$ack" = "" ] || [ "$ack" = "Y" ] || [ "$ack" = "y" ]; then
-	#		ques="$q"
-	#	else
-	#		exit 1
-	#	fi
-	#else
-	#	echo "Invalid Question number!"
-	#	exit 1
-	#fi
 fi
 
-lang=$(cat details.json | json_pp -f json | grep '"lang" :' | cut -d'"' -f4 | rofi -dmenu -no-custom -mesg "
+details=
+if [[ $(which json_reformat 2> /dev/null) ]]; then
+	details="$(cat details.json | json_reformat)"
+elif [[ $(which json_pp 2> /dev/null) ]]; then
+	details="$(cat details.json | json_pp -f json)"
+elif [[ $(which python 2> /dev/null) ]]; then
+	details="$(cat details.json | python -m json.tool)"
+else
+	details="$(cat details.json | python3 -m json.tool)"
+fi
+
+lang=$(echo "$details" | grep -P '"lang" ?:' | cut -d'"' -f4 | rofi -dmenu -no-custom -mesg "
     Question: $ques
 " -p Language -i)
 
@@ -53,8 +47,8 @@ if [ $? -eq 0 ]; then
 			vim "code.$ext"
 		;;
 		"2. Overwrite existing code, fresh start")
-			cat details.json | json_pp -f json | grep -P "\"lang\" : \"$lang\"" -B 1 | grep '"code"' | cut -d'"' -f4 | sed 's/\\n/\n/g' > "code.$ext"
 			vim "code.$ext"	
+			echo "$details" | grep -P "\"lang\" ?: \"$lang\"" -B 1 -A 2 | grep '"code"' | cut -d'"' -f4 | sed 's/\\n/\n/g' > "code.$ext"
 		;;
 		"3. Delete existing $lang code")
 			rm "code.$ext"
@@ -66,8 +60,8 @@ if [ $? -eq 0 ]; then
 		;;
 	esac
 else
-	cat details.json | json_pp -f json | grep -P "\"lang\" : \"$lang\"" -B 1 | grep '"code"' | cut -d'"' -f4 | sed 's/\\n/\n/g' > "code.$ext"
 	vim "code.$ext"	
+	echo "$details" | grep -P "\"lang\" ?: \"$lang\"" -B 1 -A 2 | grep '"code"' | cut -d'"' -f4 | sed 's/\\n/\n/g' > "code.$ext"
 fi
 
 [[ $(ls 1 2> /dev/null) ]] && rm 1 > /dev/null
