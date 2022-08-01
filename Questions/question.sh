@@ -9,7 +9,16 @@ browser=$(which "$browser" 2> /dev/null || echo "xdg-open")
 ques=$(basename "$(pwd)")
 
 if [ "$ques" = "Questions" ]; then
-	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i)
+
+	solved=$(git shortlog -w0,0,0 | sed -En '/^[Ss]olved/{ s/^.{8}([0-9]+).*/\1-1/g; p }' | sort -nu | bc)
+	attempted=$(ls -v */code.* | sed 's/\..*/-1/g' | sort -nu | bc)
+	# incomplete=$(diff --unchanged-line-format='' --old-line-format='' --new-line-format="%L" <(echo "${solved[@]}") <(echo "${attempted[@]}"))
+	# ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i -a "$(printf -- '%s,' $solved)" -u "$(printf -- '%s,' $incomplete)")
+	
+	# marking solved questions as `active` and the remaining incomplete/unaccepted solutions as `urgent`
+	# in rofi-dmenu `active` property overrides `urgent` property, so any element marked both
+	# `active` and `urgent` will be marked as `active`, so no need for incomplete variable
+	ques=$(ls -dv *.\ * | rofi -dmenu --no-custom -p Question -i -a "$(printf -- '%s,' $solved)" -u "$(printf -- '%s,' $attempted)")
 
 	if [ "$ques" = "" ]; then
 		exit 1
