@@ -18,17 +18,17 @@ Motivation to collate this list is to attain consistency in solving LeetCode pro
 ## Usage
 There are two different scripts that are provided for two different use cases:
 1. **Viewing Question** -
-   you can view question by simply executing the `Questions/question.sh` file.
+   you can view question by simply executing the `question.sh` script.
    ```shell
    cd /path/to/repo
-   ./Questions/question.sh
+   ./question.sh
    ```
 
 2. **Solving Question** -
-   you can write code using the code-template that comes with the question, by executing `Questions/code.sh` file.
+   you can write code using the code-template that comes with the question, by executing `code.sh` script.
    ```shell
    cd /path/to/repo
-   ./Questions/code.sh
+   ./code.sh
    ```
 
 ### Note
