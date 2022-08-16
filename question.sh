@@ -222,7 +222,7 @@ content=$(cat details.json | $parser | sed -n '/"content" \?:/{s/^\s*"content" \
 if [ ${#content} -lt 20 ]; then
     echo '<div class="premium">Premium Subscription is required</div>' >> $file
 else
-    echo $content >> $file
+    echo "$content" >> $file
 fi
 
 cat <<EOF >> $file
